@@ -22,6 +22,14 @@ const meditationSchema = new Schema({
     baseQuote: {
         type: String,
         required: true
+    },
+    colorA: {
+        type: String,
+        required: true
+    },
+    colorB: {
+        type: String,
+        required: true
     }
 });
 

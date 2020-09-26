@@ -13,6 +13,16 @@ router.post('/background', isAdmin, adminController.postBackground);
 router.put('/background/:backgroundId', isAdmin, adminController.updateBackground);
 
 //delete background
-router.delete('/delete-background/:backgroundId', adminController.deleteBackground);
+router.delete('/delete-background/:backgroundId', isAdmin ,adminController.deleteBackground);
+
+//create meditation
+router.post('/meditation', isAdmin, adminController.postMeditation);
+
+//edit or update a pre-existing meditation
+router.put('/meditation/:meditationId', isAdmin, adminController.updateMeditation);
+
+//delete meditation
+router.delete('/delete-meditation/:meditationId', isAdmin, adminController.deleteMeditation);
+
 
 module.exports = router;
