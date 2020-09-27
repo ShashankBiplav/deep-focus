@@ -320,13 +320,15 @@ exports.postQuote = async (req, res, next) => {
     });
     try {
         const result = await quote.save();
-        async function saveIds () {
+
+        async function saveIds() {
             for (const id of quoteCategoryIds) {
                 const quoteCategory = await QuoteCategory.findById(id);
                 quoteCategory.quotes.push(quote);
                 await quoteCategory.save();
             }
         }
+
         await saveIds();
         res.status(201).json({
             message: 'Quote added successfully',
@@ -361,13 +363,15 @@ exports.updateQuote = async (req, res, next) => {// todo
         quote.author = author;
         quote.category = quoteCategoryIds;
         const result = await quote.save();
-        async function saveIds () {
+
+        async function saveIds() {
             for (const id of quoteCategoryIds) {
                 const quoteCategory = await QuoteCategory.findById(id);
                 quoteCategory.quotes.push(quote);
                 await quoteCategory.save();
             }
         }
+
         await saveIds();
         res.status(201).json({
             message: 'Quote updated successfully',
@@ -398,6 +402,92 @@ exports.deleteQuote = async (req, res, next) => {
         }
         res.status(200).json({
             message: 'Quote removed'
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.postQuoteCategory = async (req, res, next) => {
+    const name = req.body.name;
+    const quoteCategory = new QuoteCategory({
+        name: name
+    });
+    try {
+        const result = await quoteCategory.save();
+        res.status(201).json({
+            message: 'Quote Category added successfully',
+            result: result
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.updateQuoteCategory = async (req, res, next) => {
+    const quoteCatId = req.params.quoteCategoryId;
+    const name = req.body.name;
+    const quotesIds = req.body.quotesIds;
+    try {
+        const quoteCategory = await QuoteCategory.findById(quoteCatId);
+        if (!quoteCategory) {
+            const error = new Error('Could not find Quote Category.');
+            error.statusCode = 404;
+            throw error;
+        }
+        for (const id of quoteCategory.quotes) {
+            const quote = await Quote.findById(id);
+            quote.category.pull(quoteCategory);
+            await quote.save();
+        }
+        quoteCategory.name = name;
+        quoteCategory.quotes = quotesIds;
+        const result = await quoteCategory.save();
+
+        async function saveIds() {
+            for (const id of quotesIds) {
+                const quote = await Quote.findById(id);
+                quote.category.push(quoteCategory);
+                await quote.save();
+            }
+        }
+
+        await saveIds();
+        res.status(201).json({
+            message: 'Quote Category updated successfully',
+            result: result
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.deleteQuoteCategory = async (req, res, next) => {
+    const quoteCatId = req.params.quoteCategoryId;
+    try {
+        const quoteCategory = await QuoteCategory.findById(quoteCatId);
+        if (!quoteCategory) {
+            const error = new Error('Could not find quote category.');
+            error.statusCode = 404;
+            throw error;
+        }
+        await QuoteCategory.findByIdAndRemove(quoteCatId);
+        for (const id of quoteCategory.quotes) {
+            const quote = await Quote.findById(id);
+            quote.category.pull(quoteCategory);
+            await quote.save();
+        }
+        res.status(200).json({
+            message: 'Quote Category removed'
         });
     } catch (err) {
         if (!err.statusCode) {
