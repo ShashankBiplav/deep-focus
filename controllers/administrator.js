@@ -342,7 +342,7 @@ exports.postQuote = async (req, res, next) => {
     }
 };
 
-exports.updateQuote = async (req, res, next) => {// todo
+exports.updateQuote = async (req, res, next) => {
     const quoteId = req.params.quoteId;
     const quoteLine = req.body.quoteLine;
     const author = req.body.author;
