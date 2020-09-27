@@ -209,6 +209,106 @@ exports.deleteMeditation = async (req, res, next) => {
     }
 };
 
+exports.postMelody = async (req, res, next) => {
+    const name = req.body.name;
+    const artist = req.body.artist;
+    const duration = req.body.duration;
+    const streamUrl = req.body.streamUrl;
+    let albumArtUrl = req.body.image;
+    if (req.file) {
+        albumArtUrl = req.file.path;
+    }
+    if (!req.file) {
+        const error = new Error('No image provided');
+        error.statusCode = 422;
+        return next(error);
+    }
+    const melody = new Melody({
+        name: name,
+        artist: artist,
+        duration: duration,
+        streamUrl: streamUrl,
+        albumArtUrl: albumArtUrl
+    });
+    try {
+        const result = await melody.save();
+        res.status(201).json({
+            message: 'melody added successfully',
+            result: result
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.updateMelody = async (req, res, next) => {
+    const melodyId = req.params.melodyId;
+    const name = req.body.name;
+    const artist = req.body.artist;
+    const duration = req.body.duration;
+    const streamUrl = req.body.streamUrl;
+    let albumArtUrl = req.body.image;
+    if (req.file) {
+        albumArtUrl = req.file.path;
+    }
+    if (!req.file) {
+        const error = new Error('No image provided');
+        error.statusCode = 422;
+        return next(error);
+    }
+    try {
+        const melody = await Melody.findById(melodyId);
+        if (!melody) {
+            const error = new Error('Could not find melody.');
+            error.statusCode = 404;
+            throw error;
+        }
+        if (albumArtUrl !== melody.albumArtUrl) {
+            clearImage(melody.albumArtUrl);
+        }
+        melody.name = name;
+        melody.artist = artist;
+        melody.duration = duration;
+        melody.streamUrl = streamUrl;
+        melody.albumArtUrl = albumArtUrl;
+        const result = await melody.save();
+        res.status(201).json({
+            message: 'melody updated successfully',
+            result: result
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.deleteMelody = async (req, res, next) => {
+    const melodyId = req.params.melodyId;
+    try {
+        const melody = await Melody.findById(melodyId);
+        if (!melody) {
+            const error = new Error('Could not find melody.');
+            error.statusCode = 404;
+            throw error;
+        }
+        clearImage(melody.albumArtUrl);
+        await Melody.findByIdAndRemove(melodyId);
+        res.status(200).json({
+            message: 'melody removed'
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
 //helper function to delete image
 const clearImage = filePath => {
     filePath = path.join(__dirname, '..', filePath);

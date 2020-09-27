@@ -24,5 +24,13 @@ router.put('/meditation/:meditationId', isAdmin, adminController.updateMeditatio
 //delete meditation
 router.delete('/delete-meditation/:meditationId', isAdmin, adminController.deleteMeditation);
 
+//create melody
+router.post('/melody', isAdmin, adminController.postMelody);
+
+//edit or update a pre-existing melody
+router.put('/melody/:melodyId', isAdmin, adminController.updateMelody);
+
+//delete melody
+router.delete('/delete-melody/:melodyId', isAdmin, adminController.deleteMelody);
 
 module.exports = router;
