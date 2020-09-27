@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const quoteSchema = new Schema({
-    quote:{
+    quoteLine:{
         type: String,
         required: true
     },

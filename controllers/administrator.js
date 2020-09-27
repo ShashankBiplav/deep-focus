@@ -309,6 +309,104 @@ exports.deleteMelody = async (req, res, next) => {
     }
 };
 
+exports.postQuote = async (req, res, next) => {
+    const quoteLine = req.body.quoteLine;
+    const author = req.body.author;
+    const quoteCategoryIds = req.body.quoteCategoryIds;
+    const quote = new Quote({
+        quoteLine: quoteLine,
+        author: author,
+        category: quoteCategoryIds
+    });
+    try {
+        const result = await quote.save();
+        async function saveIds () {
+            for (const id of quoteCategoryIds) {
+                const quoteCategory = await QuoteCategory.findById(id);
+                quoteCategory.quotes.push(quote);
+                await quoteCategory.save();
+            }
+        }
+        await saveIds();
+        res.status(201).json({
+            message: 'Quote added successfully',
+            result: result
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.updateQuote = async (req, res, next) => {// todo
+    const quoteId = req.params.quoteId;
+    const quoteLine = req.body.quoteLine;
+    const author = req.body.author;
+    const quoteCategoryIds = req.body.quoteCategoryIds;
+    try {
+        const quote = await Quote.findById(quoteId);
+        if (!quote) {
+            const error = new Error('Could not find quote.');
+            error.statusCode = 404;
+            throw error;
+        }
+        for (const id of quote.category) {
+            const category = await QuoteCategory.findById(id);
+            category.quotes.pull(quote);
+            await category.save();
+        }
+        quote.quoteLine = quoteLine;
+        quote.author = author;
+        quote.category = quoteCategoryIds;
+        const result = await quote.save();
+        async function saveIds () {
+            for (const id of quoteCategoryIds) {
+                const quoteCategory = await QuoteCategory.findById(id);
+                quoteCategory.quotes.push(quote);
+                await quoteCategory.save();
+            }
+        }
+        await saveIds();
+        res.status(201).json({
+            message: 'Quote updated successfully',
+            result: result
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+exports.deleteQuote = async (req, res, next) => {
+    const quoteId = req.params.quoteId;
+    try {
+        const quote = await Quote.findById(quoteId);
+        if (!quote) {
+            const error = new Error('Could not find quote.');
+            error.statusCode = 404;
+            throw error;
+        }
+        await Quote.findByIdAndRemove(quoteId);
+        for (const id of quote.category) {
+            const category = await QuoteCategory.findById(id);
+            category.quotes.pull(quote);
+            await category.save();
+        }
+        res.status(200).json({
+            message: 'Quote removed'
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
 //helper function to delete image
 const clearImage = filePath => {
     filePath = path.join(__dirname, '..', filePath);

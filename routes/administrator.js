@@ -33,4 +33,13 @@ router.put('/melody/:melodyId', isAdmin, adminController.updateMelody);
 //delete melody
 router.delete('/delete-melody/:melodyId', isAdmin, adminController.deleteMelody);
 
+//create quote
+router.post('/quote', isAdmin, adminController.postQuote);
+
+//edit or update a pre-existing quote
+router.put('/quote/:quoteId', isAdmin, adminController.updateQuote);
+
+//delete quote
+router.delete('/delete-quote/:quoteId', isAdmin, adminController.deleteQuote);
+
 module.exports = router;
