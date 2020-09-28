@@ -19,6 +19,8 @@
   "author": "Shashank Biplav",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^5.24.2",
+    "@sentry/tracing": "^5.24.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",

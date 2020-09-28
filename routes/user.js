@@ -37,7 +37,7 @@ router.get('/melody/:melodyId', userController.getMelody);
 //get a single quote
 router.get('/quote/:quoteId', userController.getQuote);
 
-//get a single quote
+//get a single quote category
 router.get('/quoteCategory/:quoteCategoryId', userController.getWholeQuoteCategory);
 
 module.exports = router;
